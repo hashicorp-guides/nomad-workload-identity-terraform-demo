@@ -2,12 +2,24 @@
 module "vault_setup" {
   source = "github.com/hashicorp/terraform-vault-nomad-setup"
 
+  # nomad_jwks_url should be reachable by all Consul agents and resolve to
+  # multiple Nomad agents for high availability.
+  #
+  # In a production environment this URL should be handled by an external
+  # component, such as a load balancer, a reverse proxy, or a DNS entry with
+  # multiple IPs.
   nomad_jwks_url = "http://localhost:4646/.well-known/jwks.json"
 }
 
 module "consul_setup" {
   source = "github.com/hashicorp/terraform-consul-nomad-setup"
 
+  # nomad_jwks_url should be reachable by all Consul agents and resolve to
+  # multiple Nomad agents for high availability.
+  #
+  # In a production environment this URL should be handled by an external
+  # component, such as a load balancer, a reverse proxy, or a DNS entry with
+  # multiple IPs.
   nomad_jwks_url = "http://localhost:4646/.well-known/jwks.json"
 }
 
