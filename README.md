@@ -140,3 +140,68 @@ installed and running.
    nomad
    nomad-client
    ```
+
+## Consul and Vault Namespaces
+
+The Enterprise versions of Consul and Vault support multiple namespaces. Update
+the `consul` and `vault` providers in `providers.tf` to apply these
+configuration to a different namespace.
+
+Create different [provider aliases][tf_provider_alias] to support multiple
+namespaces.
+
+```hcl
+# providers.tf
+
+provider "consul" {
+  # ...
+}
+
+provider "consul" {
+  alias = "prod"
+  # ...
+  namespace = "prod"
+}
+
+provider "vault" {
+  # ...
+}
+
+provider "vault" {
+  alias = "prod"
+  # ...
+  namespace = "prod"
+}
+```
+
+```hcl
+# main.tf
+
+module "consul_setup_default" {
+  source = "github.com/hashicorp/terraform-consul-nomad-setup"
+  # ...
+}
+
+module "consul_setup_prod" {
+  source = "github.com/hashicorp/terraform-consul-nomad-setup"
+  providers = {
+    consul = consul.prod
+  }
+  # ...
+}
+
+module "vault_setup_default" {
+  source = "github.com/hashicorp/terraform-vault-nomad-setup"
+  # ...
+}
+
+module "vault_setup_prod" {
+  source = "github.com/hashicorp/terraform-vault-nomad-setup"
+  providers = {
+    vault = vault.prod
+  }
+  # ...
+}
+```
+
+[tf_provider_alias]: https://developer.hashicorp.com/terraform/language/providers/configuration#alias-multiple-provider-configurations

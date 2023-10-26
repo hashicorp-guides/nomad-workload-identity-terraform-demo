@@ -17,6 +17,9 @@ terraform {
 
 provider "consul" {
   address = "http://127.0.0.1:8500"
+
+  # Consul Enterprise: apply configuration to a namespace.
+  # namespace = "prod"
 }
 
 provider "nomad" {
@@ -25,4 +28,7 @@ provider "nomad" {
 
 provider "vault" {
   address = "http://127.0.0.1:8200"
+
+  # Vault Enterprise: apply configuration to a namespace.
+  # namespace = "prod"
 }
