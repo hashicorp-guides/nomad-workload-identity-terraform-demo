@@ -5,38 +5,43 @@ This repository contains a quick demo to setup an environment that uses
 tokens from [Consul](https://www.consul.io/) and
 [Vault](https://www.vaultproject.io/).
 
-It uses [Terraform](https://www.terraform.io/) to configure Consul and Vault
-ACL systems and register a sample Nomad job that runs a MongoDB database and
-registers a service in Consul and reads credentials from Vault.
+It uses [Terraform](https://www.terraform.io/) to configure Consul and Vault so
+they are able to exchange JSON Web Tokens (JWT) workload identities from Nomad
+for ACL tokens.
+
+To validate the process is working correctly, a sample Nomad job is registered
+to run a MongoDB database configured with a password stored in Vault and to
+register a service in Consul.
 
 The ACL configuration is done using the following modules:
 
-  * https://github.com/hashicorp/terraform-consul-nomad-setup/
-  * https://github.com/hashicorp/terraform-vault-nomad-setup/
+  * https://github.com/hashicorp-modules/terraform-consul-nomad-setup/
+  * https://github.com/hashicorp-modules/terraform-vault-nomad-setup/
 
 ## Requirements
 
 The following tools must be installed and available as commands in your
-`$PATH`:
+system's `$PATH`:
 
   * [Consul](https://releases.hashicorp.com/consul/) v1.13.0+
   * [Nomad](https://releases.hashicorp.com/nomad/) v1.7.0+
   * [Terraform](https://releases.hashicorp.com/terraform/) v1.0.0+
   * [Vault](https://releases.hashicorp.com/vault/) v1.11.0+
 
-In order to run the sample job [Docker](https://www.docker.com/) must also be
-installed and running.
+[Docker](https://www.docker.com/) must also be installed and running to run the
+sample job.
 
 ## Quick Start
 
-1. Start dev agents for Consul, Nomad, and Vault in three different terminals.
+1. Start dev agents for Consul, Nomad, and Vault in three different terminal
+   windows.
 
    > [!WARNING]
    > These commands start development agents with static and unsafe ACL tokens
    > to simplify steps. **This approach should not be used in production**.
 
    ```console
-   consul agent -dev -config ./files/config.hcl
+   consul agent -dev -config-file ./files/consul.hcl
    ```
 
    ```console
@@ -46,6 +51,13 @@ installed and running.
    ```console
    sudo CONSUL_HTTP_TOKEN=root nomad agent -dev -config ./files/nomad.hcl
    ```
+
+   > [!NOTE]
+   > Nomad clients must always run as `root` in production environments, but
+   > when using Docker Desktop in local macOS and Windows environments you may
+   > run into file system permission errors. Try running the `nomad` command
+   > without `sudo` if you encounter this problem.
+
 2. Initialize, apply, and confirm the Terraform configuration.
 
    ```console
@@ -110,14 +122,15 @@ installed and running.
 
    Apply complete! Resources: 11 added, 0 changed, 0 destroyed.
    ```
-3. Verify connection to the database requires authentication by first trying to
-   connect without passing a user and password.
+3. Verify the connection to the database requires authentication by first
+   trying to connect without specifying any credentials.
 
    ```console
    $ nomad alloc exec $(nomad job allocs -t '{{with (index . 0)}}{{.ID}}{{end}}' workload-identity-demo) mongosh --eval 'db.adminCommand({listDatabases:1})' --quiet
    MongoServerError: Command listDatabases requires authentication
    ```
-4. Retry the command but this time passing the credentials stored in Vault.
+4. Run the command again, but this time specify an user and the password stored
+   in Vault.
 
    ```console
    $ nomad alloc exec $(nomad job allocs -t '{{with (index . 0)}}{{.ID}}{{end}}' workload-identity-demo) mongosh --username root --password super-secret --eval 'db.adminCommand({listDatabases:1})' --quiet
@@ -132,7 +145,8 @@ installed and running.
      ok: 1
    }
    ```
-5. Verify the service is registered in the Consul catalog.
+5. Verify the `mongo` service is registered in the Consul catalog.
+
    ```console
    $ consul catalog services
    consul
