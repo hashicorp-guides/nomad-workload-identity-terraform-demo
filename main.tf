@@ -1,6 +1,7 @@
 # Setup Consul and Vault JWT authentication for Nomad.
 module "vault_setup" {
-  source = "github.com/hashicorp-modules/terraform-vault-nomad-setup"
+  source  = "hashicorp-modules/nomad-setup/vault"
+  version = "1.0.0"
 
   # nomad_jwks_url should be reachable by all Consul agents and resolve to
   # multiple Nomad agents for high availability.
@@ -14,7 +15,8 @@ module "vault_setup" {
 }
 
 module "consul_setup" {
-  source = "github.com/hashicorp-modules/terraform-consul-nomad-setup"
+  source  = "hashicorp-modules/nomad-setup/consul"
+  version = "1.0.0"
 
   # nomad_jwks_url should be reachable by all Consul agents and resolve to
   # multiple Nomad agents for high availability.

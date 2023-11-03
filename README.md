@@ -15,8 +15,8 @@ register a service in Consul.
 
 The ACL configuration is done using the following modules:
 
-  * https://github.com/hashicorp-modules/terraform-consul-nomad-setup/
-  * https://github.com/hashicorp-modules/terraform-vault-nomad-setup/
+  * https://registry.terraform.io/modules/hashicorp-modules/nomad-setup/consul
+  * https://registry.terraform.io/modules/hashicorp-modules/nomad-setup/vault
 
 ## Requirements
 
