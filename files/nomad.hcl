@@ -11,11 +11,7 @@ vault {
 }
 
 consul {
-  enabled = true
-
-  address             = "http://localhost:8500"
-  service_auth_method = "nomad-services"
-  task_auth_method    = "nomad-tasks"
+  address = "http://localhost:8500"
 
   service_identity {
     aud = ["consul.io"]

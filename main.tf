@@ -10,8 +10,6 @@ module "vault_setup" {
   # component, such as a load balancer, a reverse proxy, or a DNS entry with
   # multiple IPs.
   nomad_jwks_url = "http://localhost:4646/.well-known/jwks.json"
-
-  token_ttl = 5
 }
 
 module "consul_setup" {

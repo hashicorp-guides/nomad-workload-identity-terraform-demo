@@ -1,5 +1,4 @@
 job "workload-identity-demo" {
-  vault {}
 
   group "db" {
     network {
@@ -9,8 +8,9 @@ job "workload-identity-demo" {
     }
 
     service {
-      name = "mongo"
-      port = "db"
+      provider = "consul"
+      name     = "mongo"
+      port     = "db"
     }
 
     task "mongo" {
@@ -21,6 +21,8 @@ job "workload-identity-demo" {
         ports          = ["db"]
         auth_soft_fail = true
       }
+
+      vault {}
 
       template {
         data        = <<EOF
