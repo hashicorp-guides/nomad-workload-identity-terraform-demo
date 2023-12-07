@@ -157,25 +157,14 @@ sample job.
 
 ## Consul and Vault Namespaces
 
-The Enterprise versions of Consul and Vault support multiple namespaces. Update
-the `consul` and `vault` providers in `providers.tf` to apply these
-configuration to a different namespace.
+The Enterprise versions of Consul and Vault support multiple namespaces.
 
-Create different [provider aliases][tf_provider_alias] to support multiple
-namespaces.
+In Vault, each namespace needs to be configured individually. You can create
+different [provider aliases][tf_provider_alias] to apply the configuration to
+each namespace.
 
 ```hcl
 # providers.tf
-
-provider "consul" {
-  # ...
-}
-
-provider "consul" {
-  alias = "prod"
-  # ...
-  namespace = "prod"
-}
 
 provider "vault" {
   # ...
@@ -191,30 +180,37 @@ provider "vault" {
 ```hcl
 # main.tf
 
-module "consul_setup_default" {
-  source = "github.com/hashicorp/terraform-consul-nomad-setup"
-  # ...
-}
-
-module "consul_setup_prod" {
-  source = "github.com/hashicorp/terraform-consul-nomad-setup"
-  providers = {
-    consul = consul.prod
-  }
-  # ...
-}
-
 module "vault_setup_default" {
-  source = "github.com/hashicorp/terraform-vault-nomad-setup"
+  source = "hashicorp-modules/nomad-setup/vault"
   # ...
 }
 
 module "vault_setup_prod" {
-  source = "github.com/hashicorp/terraform-vault-nomad-setup"
+  source = "hashicorp-modules/nomad-setup/vault"
+
   providers = {
     vault = vault.prod
   }
   # ...
+}
+```
+
+In Consul, the configuration module should be applied to the `default`
+namespace and you can use the `auth_method_namespace_rules` variable to specify
+mappings from Nomad workload identity claims to other Consul namespaces.
+
+```hcl
+module "consul_setup" {
+  source = "hashicorp-modules/nomad-setup/consul"
+
+  nomad_jwks_url = "http://localhost:4646/.well-known/jwks.json"
+
+  auth_method_namespace_rules = [
+    {
+      bind_namespace = "$${value.consul_namespace}"
+      selector       = "\"consul_namespace\" in value"
+    }
+  ]
 }
 ```
 
